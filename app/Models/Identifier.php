@@ -3,17 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Identifier extends Model
 {
     protected $fillable = [
         'assignment',
-        'organisation_id',
     ];
 
-    public function organisation(): BelongsTo
+    public function organisations(): BelongsToMany
     {
-        return $this->belongsTo(Organisation::class);
+        return $this->belongsToMany(Organisation::class);
     }
 }

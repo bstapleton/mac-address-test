@@ -27,12 +27,11 @@ class IdentifierTest extends TestCase
     #[Test]
     public function identifier_data_is_present(): void
     {
-        $identifier = Identifier::make([
+        $identifier = Identifier::create([
             'assignment' => '123456',
         ]);
 
-        $identifier->organisation()->associate($this->organisation);
-        $identifier->save();
+        $identifier->organisations()->attach($this->organisation);
 
         // Confirm we created the thing
         $this->assertCount(1, Identifier::all());
@@ -44,21 +43,17 @@ class IdentifierTest extends TestCase
     {
         $assignment = '123456';
 
-        $identifier = Identifier::make([
+        $identifier = Identifier::create([
             'assignment' => $assignment,
         ]);
 
-        $identifier->organisation()->associate($this->organisation);
-        $identifier->save();
+        $identifier->organisations()->attach($this->organisation);
 
         $this->expectException(QueryException::class);
 
-        $duplicateIdentifier = Identifier::make([
+        Identifier::create([
             'assignment' => $assignment,
         ]);
-
-        $duplicateIdentifier->organisation()->associate($this->organisation);
-        $duplicateIdentifier->save();
 
         // Confirm we only created one
         $this->assertCount(1, Identifier::all());
@@ -76,5 +71,21 @@ class IdentifierTest extends TestCase
 
         // Confirm it wasn't created
         $this->assertCount(0, Identifier::all());
+    }
+
+    #[Test]
+    public function identifier_can_be_shared_between_organisations(): void
+    {
+        $identifier = Identifier::create([
+            'assignment' => '123456',
+        ]);
+
+        $identifier->organisations()->attach($this->organisation);
+
+        $newOrganisation = Organisation::factory()->create();
+
+        $identifier->organisations()->attach($newOrganisation);
+
+        $this->assertCount(2, $identifier->organisations);
     }
 }

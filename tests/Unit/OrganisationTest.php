@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Identifier;
 use App\Models\Organisation;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -75,5 +76,26 @@ class OrganisationTest extends TestCase
 
         // Confirm it wasn't created
         $this->assertFalse(Organisation::where('name', 'Acme')->exists());
+    }
+
+    #[Test]
+    public function organisation_can_have_multiple_identifiers(): void
+    {
+        $organisation = Organisation::create([
+            'name' => 'Acme',
+            'address' => '123 Main St',
+        ]);
+
+        $first = Identifier::create([
+            'assignment' => '123456',
+        ]);
+        $organisation->identifiers()->attach($first);
+
+        $second = Identifier::create([
+            'assignment' => '789000',
+        ]);
+        $organisation->identifiers()->attach($second);
+
+        $this->assertCount(2, $organisation->identifiers);
     }
 }
