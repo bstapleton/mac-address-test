@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'data_sources' => [
+        'oui' => env('OUI_DATA_SOURCE', 'https://standards-oui.ieee.org/oui/oui.csv'),
+    ],
 ];
