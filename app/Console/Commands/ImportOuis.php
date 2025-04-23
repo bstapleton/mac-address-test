@@ -82,26 +82,20 @@ class ImportOuis extends Command
 
             $identifier = Identifier::where('assignment', $data[1])->first();
 
-            // The identifier doesn't exist, so make it and assign to the organisation
             if (!$identifier) {
-                Identifier::create([
+                // The identifier doesn't exist, so make it and assign to the organisation
+                $newIdentifier = Identifier::create([
                     'assignment' => $data[1],
-                    'organisation_id' => $organisation->id,
                 ]);
+
+                $newIdentifier->organisations()->attach($organisation);
 
                 $newCount++;
                 $skippedCount--;
-            }
+            } elseif (!in_array($organisation->id, $identifier->organisations()->pluck('organisation_id')->toArray())) {
+                // The identifier exists and is being attached to a new organisation as well
+                $identifier->organisations()->attach($organisation);
 
-            // The identifier exists, but has been re-assigned
-            if ($identifier && $identifier->organisation_id !== $organisation->id) {
-                $x = $identifier->organisation_id;
-                $identifier->update([
-                    'organisation_id' => $organisation->id
-                ]);
-                $y = $identifier->organisation_id;
-
-                $this->info('Identifier ' . $data[1] . ' re-assigned from ' . $x . ' to ' . $y);
                 $updatedCount++;
                 $skippedCount--;
             }
