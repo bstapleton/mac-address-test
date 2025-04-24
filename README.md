@@ -10,7 +10,7 @@
 7. Run `sail up -d`
 8. Run `npm install`
 
-There's no dependency on MySQL/Mariadb/Postgres, so it should spin up pretty quickly. Front-end bits should be accessible on localhost (hopefully - that's how it was for me, but I use Sail a lot for managing my containers, so I should be considered a tainted sample tbh).
+There's no dependency on MySQL/Mariadb/Postgres, so it should spin up pretty quickly. API will be available immediately. The front-end: see section below.
 
 ## Back-end bits
 
@@ -23,6 +23,8 @@ Once you have some data imported, you can hit the endpoints at `localhost/api/id
     "mac_addresses": ["00:00:00:00:00:00", "12:34:AB:99:00:00"]
 }
 ```
+
+You can run the tests with `sail artisan test`. I've included unit tests for both the Organisation (vendor) and the Identifier models, as well as for the controller. There's not really any tests for the front-end.
 
 ## Front-end bits
 
