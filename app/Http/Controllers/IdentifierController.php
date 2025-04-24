@@ -27,7 +27,7 @@ class IdentifierController extends Controller
                 'mac_address' => $request->input('mac_address'),
                 'assignment' => $identifier ? $identifier->assignment : 'None found',
                 'vendors' => $identifier ? $identifier->organisations->pluck('name')->toArray() : [],
-                'is_potentially_randomised' => $identifier && strlen($searchString) > 1 && in_array($searchString[1], self::ANOMALOUS_MATERIALS),
+                'is_potentially_randomised' => strlen($searchString) > 1 && in_array($searchString[1], self::ANOMALOUS_MATERIALS)
             ]
         ], $identifier ? 200 : 404);
     }
