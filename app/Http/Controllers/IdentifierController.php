@@ -10,6 +10,8 @@ use Illuminate\View\View;
 
 class IdentifierController extends Controller
 {
+    const array ANOMALOUS_MATERIALS = ['2', '6', 'A', 'E']; // Opportunity to sneak in a Half-Life reference? I'll take it.
+
     public function index(): View
     {
         return view('identifiers.index');
@@ -20,17 +22,12 @@ class IdentifierController extends Controller
         $searchString = (new Mac)->convertToOui($request->input('mac_address'));
         $identifier = Identifier::where('assignment', $searchString)->first();
 
-        if (!$identifier) {
-            return response()->json(['data' => [
-                'message' => 'MAC address not found'
-            ]], 404);
-        }
-
         return response()->json([
             'data' => [
                 'mac_address' => $request->input('mac_address'),
-                'assignment' => $identifier->assignment,
-                'vendors' => $identifier->organisations->pluck('name')->toArray()
+                'assignment' => $identifier ? $identifier->assignment : 'None found',
+                'vendors' => $identifier ? $identifier->organisations->pluck('name')->toArray() : [],
+                'is_potentially_randomised' => $identifier && in_array($searchString[1], self::ANOMALOUS_MATERIALS),
             ]
         ]);
     }
@@ -42,19 +39,25 @@ class IdentifierController extends Controller
             $searchString = (new Mac)->convertToOui($address);
             $identifier = Identifier::where('assignment', $searchString)->first();
 
+            // Is the second character of the converted assignment indicating that this could be a randomised MAC?
+            $isPotentiallyRandomised = in_array($searchString[1], self::ANOMALOUS_MATERIALS);
+
             if ($identifier) {
                 $data->push([
                     'mac_address' => $address,
                     'assignment' => $identifier->assignment,
-                    'vendors' => $identifier->organisations->pluck('name')->toArray()
+                    'vendors' => $identifier->organisations->pluck('name')->toArray(),
+                    'is_potentially_randomised' => $isPotentiallyRandomised
+                ]);
+            } else {
+                // Couldn't find it, but we still want to show something to the user about the search
+                $data->push([
+                    'mac_address' => $address,
+                    'assignment' => 'None found',
+                    'vendors' => [],
+                    'is_potentially_randomised' => $isPotentiallyRandomised
                 ]);
             }
-        }
-
-        if ($data->isEmpty()) {
-            return response()->json(['data' => [
-                'message' => 'No MAC addresses found'
-            ]], 404);
         }
 
         return response()->json([
