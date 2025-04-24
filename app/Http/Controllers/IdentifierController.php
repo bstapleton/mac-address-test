@@ -29,12 +29,13 @@ class IdentifierController extends Controller
                 'vendors' => $identifier ? $identifier->organisations->pluck('name')->toArray() : [],
                 'is_potentially_randomised' => $identifier && strlen($searchString) > 1 && in_array($searchString[1], self::ANOMALOUS_MATERIALS),
             ]
-        ]);
+        ], $identifier ? 200 : 404);
     }
 
     public function find(Request $request): JsonResponse
     {
         $data = collect();
+        $count = 0;
         foreach ($request->input('mac_addresses') as $address) {
             $searchString = (new Mac)->convertToOui($address);
             $identifier = Identifier::where('assignment', $searchString)->first();
@@ -45,6 +46,7 @@ class IdentifierController extends Controller
             }
 
             if ($identifier) {
+                $count++;
                 $data->push([
                     'mac_address' => $address,
                     'assignment' => $identifier->assignment,
@@ -64,7 +66,7 @@ class IdentifierController extends Controller
 
         return response()->json([
             'data' => $data->toArray()
-        ]);
+        ], $count > 0 ? 200 : 404);
     }
 
     public function results(Request $request): View
