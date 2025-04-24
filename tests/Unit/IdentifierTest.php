@@ -8,9 +8,11 @@ use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use Tests\TestCase;
 
 #[CoversClass(Identifier::class)]
+#[UsesClass(Organisation::class)]
 class IdentifierTest extends TestCase
 {
     use RefreshDatabase;
