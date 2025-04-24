@@ -27,7 +27,7 @@ class IdentifierController extends Controller
                 'mac_address' => $request->input('mac_address'),
                 'assignment' => $identifier ? $identifier->assignment : 'None found',
                 'vendors' => $identifier ? $identifier->organisations->pluck('name')->toArray() : [],
-                'is_potentially_randomised' => $identifier && in_array($searchString[1], self::ANOMALOUS_MATERIALS),
+                'is_potentially_randomised' => $identifier && strlen($searchString) > 1 && in_array($searchString[1], self::ANOMALOUS_MATERIALS),
             ]
         ]);
     }
@@ -40,14 +40,16 @@ class IdentifierController extends Controller
             $identifier = Identifier::where('assignment', $searchString)->first();
 
             // Is the second character of the converted assignment indicating that this could be a randomised MAC?
-            $isPotentiallyRandomised = in_array($searchString[1], self::ANOMALOUS_MATERIALS);
+            if (strlen($searchString) > 1) {
+                $isPotentiallyRandomised = in_array($searchString[1], self::ANOMALOUS_MATERIALS);
+            }
 
             if ($identifier) {
                 $data->push([
                     'mac_address' => $address,
                     'assignment' => $identifier->assignment,
                     'vendors' => $identifier->organisations->pluck('name')->toArray(),
-                    'is_potentially_randomised' => $isPotentiallyRandomised
+                    'is_potentially_randomised' => $isPotentiallyRandomised ?? false
                 ]);
             } else {
                 // Couldn't find it, but we still want to show something to the user about the search
@@ -55,7 +57,7 @@ class IdentifierController extends Controller
                     'mac_address' => $address,
                     'assignment' => 'None found',
                     'vendors' => [],
-                    'is_potentially_randomised' => $isPotentiallyRandomised
+                    'is_potentially_randomised' => $isPotentiallyRandomised ?? false
                 ]);
             }
         }
